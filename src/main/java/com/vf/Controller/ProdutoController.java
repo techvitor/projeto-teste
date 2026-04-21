@@ -2,6 +2,7 @@ package com.vf.Controller;
 
 
 import com.vf.Entity.Produto;
+import com.vf.Entity.ProdutoRequestDTO;
 import com.vf.Entity.ProdutoResponseDTO;
 import com.vf.Entity.StatusPedido;
 import com.vf.Service.ProdutoService;
@@ -21,18 +22,20 @@ public class ProdutoController {
     private ProdutoService service;
 
     @GetMapping
-    public List<Produto> listarProdutos(){
-        return service.listarProdutos();
+    public List<ProdutoResponseDTO> listarProdutos(){
+        return service.listarProdutos().stream().map(p -> new ProdutoResponseDTO(p.getId(),
+                p.getNome(), p.getPreco(), p.getStatusPedido())).toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Produto> listarProduto(@PathVariable Long id){
-        Produto produtoListado = service.listarProduto(id).get();
-        return ResponseEntity.status(HttpStatus.OK).body(produtoListado);
+    public ResponseEntity<ProdutoResponseDTO> listarProduto(@PathVariable Long id){
+        return service.listarProduto(id).map(p -> ResponseEntity.ok(new ProdutoResponseDTO(
+                (p.getId()), p.getNome(), p.getPreco(), p.getStatusPedido())
+        )).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<ProdutoResponseDTO> criarProduto(@RequestBody ProdutoResponseDTO dto){
+    public ResponseEntity<ProdutoResponseDTO> criarProduto(@RequestBody ProdutoRequestDTO dto){
         Produto produto = new Produto();
         produto.setNome(dto.nome());
         produto.setPreco(dto.preco());
@@ -53,9 +56,21 @@ public class ProdutoController {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<Produto> alterarProduto(@PathVariable Long id, @RequestBody Produto produto){
-        Produto produtoAlterado = service.alterarProduto(produto, id);
-        return ResponseEntity.status(HttpStatus.CREATED).body(produtoAlterado);
+    ResponseEntity<ProdutoResponseDTO> alterarProduto(@PathVariable Long id, @RequestBody ProdutoRequestDTO dto){
+        if (service.listarProduto(id).isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+        Produto dadosNovos = new Produto();
+        dadosNovos.setNome(dto.nome());
+        dadosNovos.setPreco(dto.preco());
+
+        Produto produtoAtualizadp = service.alterarProduto(dadosNovos, id);
+
+        ProdutoResponseDTO response = new ProdutoResponseDTO(produtoAtualizadp.getId(), produtoAtualizadp.getNome(),
+                produtoAtualizadp.getPreco(), produtoAtualizadp.getStatusPedido());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 }
