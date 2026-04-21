@@ -25,9 +25,6 @@ public class ProdutoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Produto> listarProduto(@PathVariable Long id){
-        if (!service.listarProduto(id).isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         Produto produtoListado = service.listarProduto(id).get();
         return ResponseEntity.status(HttpStatus.OK).body(produtoListado);
     }
@@ -40,18 +37,12 @@ public class ProdutoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarProduto(@PathVariable Long id){
-        if(!service.listarProduto(id).isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         service.deletarProduto(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PutMapping("/{id}")
     ResponseEntity<Produto> alterarProduto(@PathVariable Long id, @RequestBody Produto produto){
-        if (!service.listarProduto(id).isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         Produto produtoAlterado = service.alterarProduto(produto, id);
         return ResponseEntity.status(HttpStatus.CREATED).body(produtoAlterado);
     }
