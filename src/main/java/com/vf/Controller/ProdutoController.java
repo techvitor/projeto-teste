@@ -2,6 +2,8 @@ package com.vf.Controller;
 
 
 import com.vf.Entity.Produto;
+import com.vf.Entity.ProdutoResponseDTO;
+import com.vf.Entity.StatusPedido;
 import com.vf.Service.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,9 +32,18 @@ public class ProdutoController {
     }
 
     @PostMapping
-    public ResponseEntity<Produto> criarProduto(@RequestBody Produto produto){
+    public ResponseEntity<ProdutoResponseDTO> criarProduto(@RequestBody ProdutoResponseDTO dto){
+        Produto produto = new Produto();
+        produto.setNome(dto.nome());
+        produto.setPreco(dto.preco());
+        produto.setStatusPedido(StatusPedido.PENDENTE);
+
         Produto novoProduto = service.criarProduto(produto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoProduto);
+
+        ProdutoResponseDTO resposta = new ProdutoResponseDTO(novoProduto.getId(),
+                novoProduto.getNome(), novoProduto.getPreco(), novoProduto.getStatusPedido());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
     }
 
     @DeleteMapping("/{id}")
