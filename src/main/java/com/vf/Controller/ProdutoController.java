@@ -29,6 +29,9 @@ public class ProdutoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProdutoResponseDTO> listarProduto(@PathVariable Long id){
+        if (service.listarProduto(id).isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
         return service.listarProduto(id).map(p -> ResponseEntity.ok(new ProdutoResponseDTO(
                 (p.getId()), p.getNome(), p.getPreco(), p.getStatusPedido())
         )).orElse(ResponseEntity.notFound().build());
@@ -51,6 +54,9 @@ public class ProdutoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarProduto(@PathVariable Long id){
+        if (service.listarProduto(id).isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
         service.deletarProduto(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
